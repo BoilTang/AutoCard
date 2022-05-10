@@ -32,6 +32,7 @@ target/
 .factorypath
 .classpath
 .project
+.idea/
 
 # cache file
 *.cache
@@ -39,3 +40,6 @@ cache/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+test_*.properties
+code/
+autocard_cache.json
