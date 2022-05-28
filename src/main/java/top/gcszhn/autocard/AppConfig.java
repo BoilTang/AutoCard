@@ -35,7 +35,6 @@ import org.springframework.core.env.Environment;
 import lombok.Getter;
 import top.gcszhn.autocard.service.MailService;
 import top.gcszhn.autocard.utils.LogUtils;
-import top.gcszhn.autocard.utils.ocr.EngineType;
 
 
 /**
@@ -47,6 +46,7 @@ import top.gcszhn.autocard.utils.ocr.EngineType;
 public class AppConfig implements EnvironmentAware {
     /**默认字符集 */
     public static final Charset APP_CHARSET = StandardCharsets.UTF_8;
+    /** 创建APP临时目录*/
     public static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir") , "autocard");
     static {
         try {
@@ -66,10 +66,8 @@ public class AppConfig implements EnvironmentAware {
     private @Getter boolean testMode = false;
     /**是否启用预览特性 */
     private @Getter boolean enablePreview = false;
-    /**默认OCR引擎 */
-    private @Getter EngineType ocrEngine = EngineType.D4_OCR;
+    /** 加载APP配置文件*/
     public AppConfig() {
-        LogUtils.printMessage("Test mode is " + testMode, LogUtils.Level.DEBUG);
         try (FileInputStream fis = new FileInputStream(APP_CACHE)) {
             appCache = JSON.parseObject(new String(fis.readAllBytes(), APP_CHARSET));
             LogUtils.printMessage("缓存加载成功", LogUtils.Level.DEBUG);
@@ -87,12 +85,6 @@ public class AppConfig implements EnvironmentAware {
             loadJSONConfig(env.getProperty("app.autoCard.config"));
             testMode = appConfig.getBooleanValue("testmode");
             enablePreview = appConfig.getBooleanValue("enablepreview");
-            try {
-                ocrEngine = EngineType.valueOf(appConfig.getString("ocr").toUpperCase());
-                LogUtils.printMessage("OCR引擎为" + ocrEngine);
-            } catch (Exception e) {
-                LogUtils.printMessage("未配置有效的OCR引擎，使用默认OCR引擎" + ocrEngine);
-            }
             
             // 通过系统环境变量添加单个打卡用户
             
@@ -113,6 +105,9 @@ public class AppConfig implements EnvironmentAware {
             String javaTmpDir = System.getProperty("java.io.tmpdir");
             if (javaTmpDir == null) {
                 javaTmpDir = ".";
+            }
+            if (testMode) {
+                LogUtils.printMessage("测试模式已开启");
             }
         } catch (Exception e) {
             LogUtils.printMessage("APP环境初始化失败", e, LogUtils.Level.ERROR);
